@@ -7,7 +7,9 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.WebDriverRunner;
 
 public class KtmTrainScraper {
 
@@ -25,6 +27,8 @@ public class KtmTrainScraper {
 	private static final String BUTTON_SEARCH = ".search-btn > button";
 
 	public List<Schedule> scrape(List<DateTime> targetDates) {
+		Configuration.browser = WebDriverRunner.CHROME;
+		Configuration.headless = true;
 		List<Schedule> availableSchedules = new ArrayList<Schedule>();
 		for (int i = 0; i < 31; i++) {
 			DateTime date = DateTime.now().withTime(0, 0, 0, 0).plusDays(i);
