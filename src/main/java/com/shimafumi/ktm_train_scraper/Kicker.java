@@ -13,10 +13,13 @@ public class Kicker {
 		for (int i = 0; i < args.length; i++) {
 			targetDates.add(new DateTime(args[i]));
 		}
-		new KtmTrainScraper().scrape(targetDates)
-				.forEach(schedule -> System.out.println(String.format("%s %s %s",
-						DateTimeFormat.forPattern("yyyy-MM-dd EEE").print(schedule.departDate), schedule.departTime,
-						schedule.vacancy)));
+
+		List<Schedule> availables = new ArrayList<Schedule>();
+		availables.addAll(new KtmTrainScraper().scrape("Singapore", "JB Sentral", targetDates));
+		availables.addAll(new KtmTrainScraper().scrape("JB Sentral", "Singapore", targetDates));
+		availables.forEach(schedule -> System.out.println(String.format("%s %s %s %s %s", schedule.getOrigin(),
+				schedule.getDestination(), DateTimeFormat.forPattern("yyyy-MM-dd EEE").print(schedule.departDate),
+				schedule.departTime, schedule.vacancy)));
 	}
 
 }

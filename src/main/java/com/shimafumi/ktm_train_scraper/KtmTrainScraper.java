@@ -26,7 +26,7 @@ public class KtmTrainScraper {
 	private static final String TEXT_DEPARTURE_DATE = "#dpDepartureDate_Train";
 	private static final String BUTTON_SEARCH = ".search-btn > button";
 
-	public List<Schedule> scrape(List<DateTime> targetDates) {
+	public List<Schedule> scrape(String origin, String destination, List<DateTime> targetDates) {
 		Configuration.browser = WebDriverRunner.CHROME;
 		Configuration.headless = true;
 		List<Schedule> availableSchedules = new ArrayList<Schedule>();
@@ -37,9 +37,9 @@ public class KtmTrainScraper {
 			}
 			Selenide.open(URL);
 			Selenide.$(RADIO_ONE_WAY).click();
-			Selenide.$(TEXT_ORIGIN).setValue("Singapore");
+			Selenide.$(TEXT_ORIGIN).setValue(origin);
 			Selenide.sleep(1000);
-			Selenide.$(TEXT_DESTINATON).setValue("JB Sentral");
+			Selenide.$(TEXT_DESTINATON).setValue(destination);
 			Selenide.sleep(1000);
 			Selenide.$(TEXT_DEPARTURE_DATE).setValue(DateTimeFormat.forPattern("yyyy-MM-dd").print(date));
 			Selenide.$(BUTTON_SEARCH).click();
