@@ -43,7 +43,7 @@ public class KtmTrainScraper {
 			Selenide.sleep(1000);
 			Selenide.$(TEXT_DEPARTURE_DATE).setValue(DateTimeFormat.forPattern("yyyy-MM-dd").print(date));
 			Selenide.$(BUTTON_SEARCH).click();
-			Selenide.$(DIV_PRELOADER).waitUntil(Condition.disappear, 10000);
+			Selenide.$(DIV_PRELOADER).waitUntil(Condition.disappear, 60000);
 			Selenide.$$(SEARCH_RESULT).forEach(row -> {
 				Schedule s = new Schedule();
 				s.setDepartDate(date);
