@@ -27,7 +27,7 @@ public class KtmTrainScraper {
 	private static final String BUTTON_SEARCH = ".search-btn > button";
 
 	public List<Schedule> scrape(String origin, String destination, List<DateTime> targetDates) {
-		Configuration.browser = WebDriverRunner.CHROME;
+		Configuration.browser = WebDriverRunner.FIREFOX;
 		Configuration.headless = true;
 		List<Schedule> availableSchedules = new ArrayList<Schedule>();
 		for (int i = 0; i < 31; i++) {
