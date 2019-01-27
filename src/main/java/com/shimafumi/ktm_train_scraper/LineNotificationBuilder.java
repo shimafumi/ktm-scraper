@@ -11,6 +11,13 @@ public class LineNotificationBuilder {
 	private final String LINE_SEPARATER = System.getProperty("line.separator");
 
 	public List<StringBuilder> buildMessage(List<Schedule> schedules) {
+		Map<Key, List<Schedule>> groupedSchedules = group(schedules);
+		StringBuilder longMessage = buildLogMessage(groupedSchedules);
+		List<StringBuilder> messages = split(longMessage);
+		return paginate(messages);
+	}
+
+	private Map<Key, List<Schedule>> group(List<Schedule> schedules) {
 		Map<Key, List<Schedule>> map = new HashMap<Key, List<Schedule>>();
 		schedules.forEach(s -> {
 			Key key = new Key(s.origin, s.destination);
@@ -22,7 +29,10 @@ public class LineNotificationBuilder {
 				map.put(key, list);
 			}
 		});
+		return map;
+	}
 
+	private StringBuilder buildLogMessage(Map<Key, List<Schedule>> map) {
 		StringBuilder bs = new StringBuilder();
 		map.entrySet().forEach(key -> {
 			bs.append(String.format("%s > %s", key.getKey().getOrigin(), key.getKey().getDestination()));
@@ -33,24 +43,29 @@ public class LineNotificationBuilder {
 				bs.append(LINE_SEPARATER);
 			});
 		});
+		return bs;
+	}
 
+	private List<StringBuilder> split(StringBuilder bs) {
 		List<String> lines = Arrays.asList(bs.toString().split(LINE_SEPARATER));
 		List<StringBuilder> messages = new ArrayList<StringBuilder>();
 		lines.forEach(l -> {
 			if (messages.isEmpty() || messages.get(messages.size() - 1).length() > 900) {
 				StringBuilder m = new StringBuilder();
 				messages.add(m);
-				bs.append(LINE_SEPARATER);
+				m.append(LINE_SEPARATER);
 			}
 			messages.get(messages.size() - 1).append(l).append(LINE_SEPARATER);
 		});
+		return messages;
+	}
 
+	private List<StringBuilder> paginate(List<StringBuilder> messages) {
 		messages.forEach(m -> {
 			if (messages.size() > 1) {
 				m.append((messages.indexOf(m) + 1) + "/" + messages.size());
 			}
 		});
-
 		return messages;
 	}
 
