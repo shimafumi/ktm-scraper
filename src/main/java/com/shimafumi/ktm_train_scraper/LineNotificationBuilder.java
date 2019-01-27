@@ -51,7 +51,7 @@ public class LineNotificationBuilder {
 		List<String> lines = Arrays.asList(bs.toString().split(LINE_SEPARATER));
 		List<StringBuilder> messages = new ArrayList<StringBuilder>();
 		lines.forEach(l -> {
-			if (messages.isEmpty() || messages.get(messages.size() - 1).length() > 900) {
+			if (messages.isEmpty() || messages.get(messages.size() - 1).length() > 950) {
 				StringBuilder m = new StringBuilder();
 				messages.add(m);
 				m.append(LINE_SEPARATER);
