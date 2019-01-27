@@ -9,6 +9,8 @@ import org.joda.time.DateTime;
 
 public class Runner {
 
+	private final String token = System.getProperty("LINE.notify.token");
+
 	public void run(List<DateTime> targetDates) {
 		List<Schedule> availables = new ArrayList<Schedule>();
 		availables.addAll(new KtmTrainScraper().scrape("Singapore", "JB Sentral", targetDates));
@@ -34,10 +36,13 @@ public class Runner {
 				bs.append(System.getProperty("line.separator"));
 				bs.append(String.format("%s %s %s", s.getDepartDate().toString("yyyy-MM-dd EEE"), s.getDepartTime(),
 						s.getVacancy()));
+				if(bs.length()>900) {
+					new LineNotificationSender().send(token, bs.toString());
+					bs.delete(0, bs.length());
+				}
 			});
 		});
-		String token = System.getProperty("LINE.notify.token");
-		new LineNotificationSender().send(token, bs.toString());
+
 	}
 
 	private class Key {
