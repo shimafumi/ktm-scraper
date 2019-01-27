@@ -24,6 +24,7 @@ public class LineNotificationSender {
 
 		CloseableHttpResponse response = null;
 		try {
+			request.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			request.setHeader("Authorization", "Bearer " + token);
 			request.setEntity(new UrlEncodedFormEntity(requestParams, "UTF-8"));
 			response = httpclient.execute(request);
