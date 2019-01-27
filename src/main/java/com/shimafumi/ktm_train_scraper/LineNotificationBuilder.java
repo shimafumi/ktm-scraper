@@ -42,6 +42,7 @@ public class LineNotificationBuilder {
 						s.getVacancy()));
 				bs.append(LINE_SEPARATER);
 			});
+			bs.append(LINE_SEPARATER);
 		});
 		return bs;
 	}
