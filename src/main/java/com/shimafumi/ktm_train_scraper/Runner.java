@@ -42,6 +42,7 @@ public class Runner {
 				}
 			});
 		});
+		new LineNotificationSender().send(token, bs.toString());
 
 	}
 
