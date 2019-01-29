@@ -6,43 +6,59 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.DateTime;
+
 public class LineNotificationBuilder {
 
 	private final String LINE_SEPARATER = System.getProperty("line.separator");
 
 	public List<StringBuilder> buildMessage(List<Schedule> schedules) {
-		Map<Key, List<Schedule>> groupedSchedules = group(schedules);
+		Map<BreakKey1, Map<BreakKey2, List<Schedule>>> groupedSchedules = group(schedules);
 		StringBuilder longMessage = buildLogMessage(groupedSchedules);
 		List<StringBuilder> messages = split(longMessage);
 		return paginate(messages);
 	}
 
-	private Map<Key, List<Schedule>> group(List<Schedule> schedules) {
-		Map<Key, List<Schedule>> map = new HashMap<Key, List<Schedule>>();
+	private Map<BreakKey1, Map<BreakKey2, List<Schedule>>> group(List<Schedule> schedules) {
+		Map<BreakKey1, Map<BreakKey2, List<Schedule>>> map = new HashMap<BreakKey1, Map<BreakKey2, List<Schedule>>>();
 		schedules.forEach(s -> {
-			Key key = new Key(s.origin, s.destination);
-			if (map.containsKey(key)) {
-				map.get(key).add(s);
+			BreakKey1 key1 = new BreakKey1(s.origin, s.destination);
+			BreakKey2 key2 = new BreakKey2(s.departDate);
+			if (map.containsKey(key1)) {
+				Map<BreakKey2, List<Schedule>> innerMap = map.get(key1);
+				if (innerMap.containsKey(key2)) {
+					innerMap.get(key2).add(s);
+				} else {
+					List<Schedule> list = new ArrayList<Schedule>();
+					list.add(s);
+					innerMap.put(key2, list);
+
+				}
 			} else {
+				Map<BreakKey2, List<Schedule>> innerMap = new HashMap<BreakKey2, List<Schedule>>();
 				List<Schedule> list = new ArrayList<Schedule>();
 				list.add(s);
-				map.put(key, list);
+				innerMap.put(key2, list);
+				map.put(key1, innerMap);
 			}
 		});
 		return map;
 	}
 
-	private StringBuilder buildLogMessage(Map<Key, List<Schedule>> map) {
+	private StringBuilder buildLogMessage(Map<BreakKey1, Map<BreakKey2, List<Schedule>>> map) {
 		StringBuilder bs = new StringBuilder();
-		map.entrySet().forEach(key -> {
-			bs.append(String.format("%s > %s", key.getKey().getOrigin(), key.getKey().getDestination()));
+		map.entrySet().forEach(entry -> {
+			bs.append(String.format("%s > %s", entry.getKey().getOrigin(), entry.getKey().getDestination()));
 			bs.append(LINE_SEPARATER);
-			key.getValue().forEach(s -> {
-				bs.append(String.format("%s %s %s", s.getDepartDate().toString("yyyy/MM/dd EEE"), s.getDepartTime(),
-						s.getVacancy()));
+			entry.getValue().entrySet().forEach(innerMap -> {
+				bs.append(String.format("%s", innerMap.getKey().getDepartTime().toString("yyyy/MM/dd EEE")));
+				bs.append(LINE_SEPARATER);
+				innerMap.getValue().forEach(s -> {
+					bs.append(String.format("%s %s", s.getDepartTime(), s.getVacancy()));
+					bs.append(LINE_SEPARATER);
+				});
 				bs.append(LINE_SEPARATER);
 			});
-			bs.append(LINE_SEPARATER);
 		});
 		return bs;
 	}
@@ -51,7 +67,7 @@ public class LineNotificationBuilder {
 		List<String> lines = Arrays.asList(bs.toString().split(LINE_SEPARATER));
 		List<StringBuilder> messages = new ArrayList<StringBuilder>();
 		lines.forEach(l -> {
-			if (messages.isEmpty() || messages.get(messages.size() - 1).length() > 950) {
+			if (messages.isEmpty() || messages.get(messages.size() - 1).length() + l.length() > 990) {
 				StringBuilder m = new StringBuilder();
 				messages.add(m);
 				m.append(LINE_SEPARATER);
@@ -70,11 +86,11 @@ public class LineNotificationBuilder {
 		return messages;
 	}
 
-	private class Key {
+	private class BreakKey1 {
 		private final String origin;
 		private final String destination;
 
-		private Key(String origin, String destination) {
+		private BreakKey1(String origin, String destination) {
 			super();
 			this.origin = origin;
 			this.destination = destination;
@@ -106,7 +122,7 @@ public class LineNotificationBuilder {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Key other = (Key) obj;
+			BreakKey1 other = (BreakKey1) obj;
 			if (!getOuterType().equals(other.getOuterType()))
 				return false;
 			if (destination == null) {
@@ -125,5 +141,51 @@ public class LineNotificationBuilder {
 		private LineNotificationBuilder getOuterType() {
 			return LineNotificationBuilder.this;
 		}
+	}
+
+	private class BreakKey2 {
+		private final DateTime departTime;
+
+		public BreakKey2(DateTime departTime) {
+			super();
+			this.departTime = departTime;
+		}
+
+		public DateTime getDepartTime() {
+			return departTime;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((departTime == null) ? 0 : departTime.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			BreakKey2 other = (BreakKey2) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (departTime == null) {
+				if (other.departTime != null)
+					return false;
+			} else if (!departTime.equals(other.departTime))
+				return false;
+			return true;
+		}
+
+		private LineNotificationBuilder getOuterType() {
+			return LineNotificationBuilder.this;
+		}
+
 	}
 }
