@@ -50,7 +50,7 @@ public class LineNotificationBuilder {
 		map.entrySet().forEach(entry -> {
 			bs.append(String.format("%s > %s", entry.getKey().getOrigin(), entry.getKey().getDestination()));
 			bs.append(LINE_SEPARATER);
-			entry.getValue().entrySet().forEach(innerMap -> {
+			entry.getValue().entrySet().stream().sorted().forEach(innerMap -> {
 				bs.append(String.format("%s", innerMap.getKey().getDepartTime().toString("yyyy/MM/dd EEE")));
 				bs.append(LINE_SEPARATER);
 				innerMap.getValue().forEach(s -> {
@@ -143,7 +143,7 @@ public class LineNotificationBuilder {
 		}
 	}
 
-	private class BreakKey2 {
+	private class BreakKey2 implements Comparable<BreakKey2>{
 		private final DateTime departTime;
 
 		public BreakKey2(DateTime departTime) {
@@ -185,6 +185,11 @@ public class LineNotificationBuilder {
 
 		private LineNotificationBuilder getOuterType() {
 			return LineNotificationBuilder.this;
+		}
+
+		@Override
+		public int compareTo(BreakKey2 o) {
+			return this.getDepartTime().compareTo(o.getDepartTime());
 		}
 
 	}
