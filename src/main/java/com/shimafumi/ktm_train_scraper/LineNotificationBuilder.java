@@ -2,9 +2,11 @@ package com.shimafumi.ktm_train_scraper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.joda.time.DateTime;
 
@@ -47,10 +49,23 @@ public class LineNotificationBuilder {
 
 	private StringBuilder buildLogMessage(Map<BreakKey1, Map<BreakKey2, List<Schedule>>> map) {
 		StringBuilder bs = new StringBuilder();
-		map.entrySet().forEach(entry -> {
+		map.entrySet().stream().sorted(new Comparator<Entry<BreakKey1, Map<BreakKey2, List<Schedule>>>>() {
+
+			@Override
+			public int compare(Entry<BreakKey1, Map<BreakKey2, List<Schedule>>> o1,
+					Entry<BreakKey1, Map<BreakKey2, List<Schedule>>> o2) {
+				return o1.getKey().getOrigin().compareTo(o2.getKey().getOrigin());
+			}
+		}).forEach(entry -> {
 			bs.append(String.format("%s > %s", entry.getKey().getOrigin(), entry.getKey().getDestination()));
 			bs.append(LINE_SEPARATER);
-			entry.getValue().entrySet().stream().sorted().forEach(innerMap -> {
+			entry.getValue().entrySet().stream().sorted(new Comparator<Entry<BreakKey2, List<Schedule>>>() {
+
+				@Override
+				public int compare(Entry<BreakKey2, List<Schedule>> o1, Entry<BreakKey2, List<Schedule>> o2) {
+					return o1.getKey().compareTo(o2.getKey());
+				}
+			}).forEach(innerMap -> {
 				bs.append(String.format("%s", innerMap.getKey().getDepartTime().toString("yyyy/MM/dd EEE")));
 				bs.append(LINE_SEPARATER);
 				innerMap.getValue().forEach(s -> {
@@ -141,9 +156,10 @@ public class LineNotificationBuilder {
 		private LineNotificationBuilder getOuterType() {
 			return LineNotificationBuilder.this;
 		}
+
 	}
 
-	private class BreakKey2 implements Comparable<BreakKey2>{
+	private class BreakKey2 implements Comparable<BreakKey2> {
 		private final DateTime departTime;
 
 		public BreakKey2(DateTime departTime) {
